@@ -46,3 +46,19 @@ public class UploadFileController {
 		return new APIResponse(true, "Files are uploaded successfully.");
 	}
 }
+
+ ExecutorService service=Executors.newSingleThreadExecutor();
+        final Future<Object> submit = service.submit(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                HttpEntity<?> httpEntity = new HttpEntity<Object>("Prashanth");
+                RestTemplate restTemplate=new RestTemplate();
+                URI uri = new URI("http://localhost:8090/api/rest");
+                String future =restTemplate.postForObject(uri,httpEntity, String.class);
+                return "";
+            }
+        });
+        try {
+            submit.get(0, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+        }
