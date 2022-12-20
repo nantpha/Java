@@ -62,3 +62,50 @@ public class UploadFileController {
             submit.get(0, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
         }
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
+public class MonoToStereoConverter {
+
+  public static void main(String[] args) throws Exception {
+    // Load the mono audio file into a byte array
+    byte[] monoData = loadAudioFile("input.wav");
+
+    // Convert the byte array to a float array
+    float[] samples = new float[monoData.length / 4];
+    for (int i = 0; i < samples.length; i++) {
+      samples[i] = ByteBuffer.wrap(monoData, i * 4, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+    }
+
+    // Duplicate the float array to create a stereo signal
+    float[] stereoSamples = new float[samples.length * 2];
+    for (int i = 0; i < samples.length; i++) {
+      stereoSamples[i * 2] = samples[i];
+      stereoSamples[i * 2 + 1] = samples[i];
+    }
+
+    // Convert the stereo signal back to a byte array
+    byte[] stereoData = new byte[stereoSamples.length * 4];
+    for (int i = 0; i < stereoSamples.length; i++) {
+      byte[] sampleBytes = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putFloat(stereoSamples[i]).array();
+      System.arraycopy(sampleBytes, 0, stereoData, i * 4, 4);
+    }
+
+    // Write the stereo signal to a new audio file
+    writeAudioFile("output.wav", stereoData);
+  }
+
+  private static byte[] loadAudioFile(String fileName) throws Exception {
+    // This method should load the audio file into a byte array and return it
+    // You can use a Java input stream to read the file and convert it to a byte array
+  }
+
+  private static void writeAudioFile(String fileName, byte[] data) throws Exception {
+    // This method should write the audio data to a new audio file
+    // You can use a Java output stream to write the data to the file
+  }
+}
