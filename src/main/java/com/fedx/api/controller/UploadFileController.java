@@ -702,9 +702,178 @@ AudioInputStream audioInputStream = new AudioInputStream(new ByteArrayInputStrea
 
 File outputFile = new File("output.wav");
 AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, outputFile);
+-------------------
+	
+	
+	
+	  
+	  for (int i = 0; i < leftChannel.length; i++) {
+    stereo[2 * i] = leftChannel[i];
+    stereo[2 * i + 1] = rightChannel[i];
+}
+	  
+	  -----------
+		  
+		  
+		  import javax.sound.sampled.*;
+import java.io.*;
+
+public class MonoToStereo {
+    public static void main(String[] args) throws Exception {
+        // Load the two mono audio files
+        byte[] leftSamples = loadAudio("left.wav");
+        byte[] rightSamples = loadAudio("right.wav");
+
+        // Interleave the samples
+        byte[] stereoSamples = new byte[leftSamples.length + rightSamples.length];
+        for (int i = 0; i < leftSamples.length; i++) {
+            stereoSamples[2 * i] = leftSamples[i];
+            stereoSamples[2 * i + 1] = rightSamples[i];
+        }
+
+        // Write the interleaved samples to a new stereo file
+        AudioFormat stereoFormat = new AudioFormat(44100, 16, 2, true, false);
+        AudioInputStream stereoStream = new AudioInputStream(new ByteArrayInputStream(stereoSamples), stereoFormat, stereoSamples.length / stereoFormat.getFrameSize());
+        AudioSystem.write(stereoStream, AudioFileFormat.Type.WAVE, new File("stereo.wav"));
+    }
+
+    private static byte[] loadAudio(String fileName) throws Exception {
+        AudioInputStream stream = AudioSystem.getAudioInputStream(new File(fileName));
+        AudioFormat format = stream.getFormat();
+        byte[] samples = new byte[(int) (stream.getFrameLength() * format.getFrameSize())];
+        DataInputStream dataStream = new DataInputStream(stream);
+        dataStream.readFully(samples);
+        return samples;
+    }
+}
+------
+	
+	
+	import javax.sound.sampled.*;
+
+public class StereoConverter {
+    public static void main(String[] args) throws Exception {
+        // Load the two mono audio streams into byte arrays
+        byte[] leftChannel = loadAudio("left.wav");
+        byte[] rightChannel = loadAudio("right.wav");
+
+        // Create a new byte array for the stereo audio
+        byte[] stereo = new byte[leftChannel.length * 2];
+
+        // Iterate through the mono arrays and copy the bytes into the stereo array
+        for (int i = 0, j = 0; i < leftChannel.length; i++, j += 2) {
+            stereo[j] = leftChannel[i];
+            stereo[j + 1] = rightChannel[i];
+        }
+
+        // Save the stereo array to a file in the desired audio format
+        saveAudio(stereo, "stereo.wav", AudioFormat.Encoding.PCM_SIGNED, 44100, 16, 2);
+    }
+
+    // Loads an audio file into a byte array
+    public static byte[] loadAudio(String fileName) throws Exception {
+        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(fileName));
+        int length = (int) (audioInputStream.getFrameLength() * audioInputStream.getFormat().getFrameSize());
+        byte[] audio = new byte[length];
+        audioInputStream.read(audio);
+        audioInputStream.close();
+        return audio;
+    }
+
+    // Saves a byte array to an audio file
+    public static void saveAudio(byte[] audio, String fileName, AudioFormat.Encoding encoding, float sampleRate, int sampleSizeInBits, int channels) throws Exception {
+        AudioFormat audioFormat = new AudioFormat(encoding, sampleRate, sampleSizeInBits, channels, channels * (sampleSizeInBits / 8), sampleRate, false);
+        AudioInputStream audioInputStream = new AudioInputStream(new ByteArrayInputStream(audio), audioFormat, audio.length / audioFormat.getFrameSize());
+        AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, new File(fileName));
+        audioInputStream.close();
+    }
+}
+----------------------------------------------
+	
+	
+	
+	import javax.sound.sampled.*;
+import java.io.*;
+
+public class MonoToStereo {
+    public static void main(String[] args) throws Exception {
+        // Load the two mono audio files
+        byte[] leftSamples = loadAudio("left.wav");
+        byte[] rightSamples = loadAudio("right.wav");
+
+        // Interleave the samples
+        byte[] stereoSamples = new byte[leftSamples.length + rightSamples.length];
+        for (int i = 0; i < leftSamples.length; i++) {
+            stereoSamples[2 * i] = leftSamples[i];
+            stereoSamples[2 * i + 1] = rightSamples[i];
+        }
+
+        // Write the interleaved samples to a new stereo file
+        AudioFormat stereoFormat = new AudioFormat(44100, 16, 2, true, false);
+        AudioInputStream stereoStream = new AudioInputStream(new ByteArrayInputStream(stereoSamples), stereoFormat, stereoSamples.length / stereoFormat.getFrameSize());
+        AudioSystem.write(stereoStream, AudioFileFormat.Type.WAVE, new File("stereo.wav"));
+    }
+
+    private static byte[] loadAudio(String fileName) throws Exception {
+        AudioInputStream stream = AudioSystem.getAudioInputStream(new File(fileName));
+        AudioFormat format = stream.getFormat();
+        byte[] samples = new byte[(int) (stream.getFrameLength() * format.getFrameSize())];
+        DataInputStream dataStream = new DataInputStream(stream);
+        dataStream.readFully(samples);
+        return samples;
+    }
+}
+------------------------------
+	
+	int n = left.length;
+byte[] stereo = new byte[n * 2];
+for (int i = 0; i < n; i++) {
+    stereo[i * 2] = left[i];
+    stereo[i * 2 + 1] = right[i];
+}
 
 	  
-	  
+	  --------------------------
+		  
+		  import javax.sound.sampled.*;
+import java.io.*;
+
+public class MonoToStereo {
+    public static void main(String[] args) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+        // Load the two mono audio streams into separate byte arrays
+        File leftMonoFile = new File("left_mono.wav");
+        File rightMonoFile = new File("right_mono.wav");
+        AudioInputStream leftMonoStream = AudioSystem.getAudioInputStream(leftMonoFile);
+        AudioInputStream rightMonoStream = AudioSystem.getAudioInputStream(rightMonoFile);
+        byte[] leftMonoData = new byte[(int) leftMonoStream.getFrameLength() * leftMonoStream.getFormat().getFrameSize()];
+        byte[] rightMonoData = new byte[(int) rightMonoStream.getFrameLength() * rightMonoStream.getFormat().getFrameSize()];
+        leftMonoStream.read(leftMonoData);
+        rightMonoStream.read(rightMonoData);
+        leftMonoStream.close();
+        rightMonoStream.close();
+
+        // Create a new byte array to hold the stereo audio data
+        byte[] stereoData = new byte[leftMonoData.length * 2];
+
+        // Iterate through the mono arrays and copy the data into the stereo array
+        for (int i = 0; i < leftMonoData.length; i++) {
+            stereoData[i * 2] = leftMonoData[i];
+            stereoData[i * 2 + 1] = rightMonoData[i];
+        }
+
+        // Write the stereo audio data to a new file
+        File stereoFile = new File("stereo.wav");
+        AudioFormat stereoFormat = new AudioFormat(leftMonoStream.getFormat().getSampleRate(), leftMonoStream.getFormat().getSampleSizeInBits(), 2, true, false);
+        AudioInputStream stereoStream = new AudioInputStream(new ByteArrayInputStream(stereoData), stereoFormat, stereoData.length / stereoFormat.getFrameSize());
+        AudioSystem.write(stereoStream, AudioFileFormat.Type
+
+			  
+			  -------------------------------
+			  
+			  
+			  
+			  
+			  
 	  
 	  
 	  
