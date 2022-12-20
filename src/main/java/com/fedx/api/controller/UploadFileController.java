@@ -156,3 +156,61 @@ public class MonoToStereoConverter {
   private static byte[] loadAudioFile(String fileName) throws Exception {
     // This method should load the
 
+	  
+	  import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
+public class MonoToStereoConverter {
+
+  public static void main(String[] args) throws Exception {
+    // Load the left channel audio file into a byte array
+    byte[] leftData = loadAudioFile("left.wav");
+
+    // Convert the byte array to a float array
+    float[] leftSamples = new float[leftData.length / 4];
+    for (int i = 0; i < leftSamples.length; i++) {
+      leftSamples[i] = ByteBuffer.wrap(leftData, i * 4, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+    }
+
+    // Load the right channel audio file into a byte array
+    byte[] rightData = loadAudioFile("right.wav");
+
+    // Convert the byte array to a float array
+    float[] rightSamples = new float[rightData.length / 4];
+    for (int i = 0; i < rightSamples.length; i++) {
+      rightSamples[i] = ByteBuffer.wrap(rightData, i * 4, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+    }
+
+    // Combine the left and right channels into a single stereo signal
+    float[] stereoSamples = new float[leftSamples.length * 2];
+    for (int i = 0; i < leftSamples.length; i++) {
+      stereoSamples[i * 2] = leftSamples[i];
+      stereoSamples[i * 2 + 1] = rightSamples[i];
+    }
+
+    // Convert the stereo signal back to a byte array
+    byte[] stereoData = new byte[stereoSamples.length * 4];
+    for (int i = 0; i < stereoSamples.length; i++) {
+      byte[] sampleBytes = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putFloat(stereoSamples[i]).array();
+      System.arraycopy(sampleBytes, 0, stereoData, i * 4, 4);
+    }
+
+    // Write the stereo signal to a new audio file
+    writeAudioFile("output.wav", stereoData);
+  }
+
+  private static byte[] loadAudioFile(String fileName) throws Exception {
+    // This method should load the audio file into a byte array and return it
+    // You can use a Java input stream to read the file and convert it to a byte array
+  }
+
+  private static void writeAudioFile(String fileName, byte[] data) throws Exception {
+    // This method should write the audio data to a new audio file
+    // You can use a Java output stream to write the data to the file
+  }
+}
+
