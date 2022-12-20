@@ -109,3 +109,50 @@ public class MonoToStereoConverter {
     // You can use a Java output stream to write the data to the file
   }
 }
+
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
+public class MonoToStereoConverter {
+
+  public static void main(String[] args) throws Exception {
+    // Load the two mono audio files into separate byte arrays
+    byte[] monoData1 = loadAudioFile("input1.wav");
+    byte[] monoData2 = loadAudioFile("input2.wav");
+
+    // Convert the byte arrays to float arrays
+    float[] samples1 = new float[monoData1.length / 4];
+    for (int i = 0; i < samples1.length; i++) {
+      samples1[i] = ByteBuffer.wrap(monoData1, i * 4, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+    }
+    float[] samples2 = new float[monoData2.length / 4];
+    for (int i = 0; i < samples2.length; i++) {
+      samples2[i] = ByteBuffer.wrap(monoData2, i * 4, 4).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+    }
+
+    // Interleave the two float arrays to create a stereo signal
+    float[] stereoSamples = new float[samples1.length * 2];
+    for (int i = 0; i < samples1.length; i++) {
+      stereoSamples[i * 2] = samples1[i];
+      stereoSamples[i * 2 + 1] = samples2[i];
+    }
+
+    // Convert the stereo signal back to a byte array
+    byte[] stereoData = new byte[stereoSamples.length * 4];
+    for (int i = 0; i < stereoSamples.length; i++) {
+      byte[] sampleBytes = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putFloat(stereoSamples[i]).array();
+      System.arraycopy(sampleBytes, 0, stereoData, i * 4, 4);
+    }
+
+    // Write the stereo signal to a new audio file
+    writeAudioFile("output.wav", stereoData);
+  }
+
+  private static byte[] loadAudioFile(String fileName) throws Exception {
+    // This method should load the
+
