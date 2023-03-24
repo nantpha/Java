@@ -30,3 +30,93 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+import javax.sound.sampled.AudioFileFormat.Type;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.DataLine.Info;
+import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.TargetDataLine;
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.AudioFileFormat.Type;
+import javax.speech.Central;
+import javax.speech.synthesis.Synthesizer;
+import javax.speech.synthesis.SynthesizerModeDesc;
+import java.util.Locale;
+
+public class TextToSpeech {
+    public static void main(String[] args) {
+        try {
+            // Set up the synthesizer
+            SynthesizerModeDesc desc = new SynthesizerModeDesc(null, "general", Locale.US, null, null);
+            Synthesizer synthesizer = Central.createSynthesizer(desc);
+            synthesizer.allocate();
+            synthesizer.resume();
+
+            // Convert text to speech
+            String text = "Hello, world!";
+            synthesizer.speakPlainText(text, null);
+
+            // Get the synthesized speech as a byte array
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(synthesizer.getOutputQueueFlush());
+            byte[] bytes = new byte[audioInputStream.available()];
+            audioInputStream.read(bytes);
+
+            // Save the byte array to a WAV file
+            AudioFormat format = audioInputStream.getFormat();
+            AudioFileFormat.Type fileType = AudioFileFormat.Type.WAVE;
+            AudioSystem.write(new AudioInputStream(new ByteArrayInputStream(bytes), format, bytes.length), fileType, new File("output.wav"));
+
+            // Clean up
+            synthesizer.deallocate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
+
+import javax.speech.AudioManager;
+import javax.speech.EngineCreate;
+import javax.speech.synthesis.Synthesizer;
+import javax.speech.synthesis.SynthesizerModeDesc;
+import javax.speech.synthesis.Voice;
+import java.util.Locale;
+
+public class TextToSpeech {
+    public static void main(String[] args) {
+        try {
+            System.setProperty("freetts.voices", "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
+            SynthesizerModeDesc desc = new SynthesizerModeDesc(null, "general", Locale.US, null, null);
+            Synthesizer synthesizer = Central.createSynthesizer(desc);
+            synthesizer.allocate();
+            synthesizer.resume();
+            synthesizer.getSynthesizerProperties().setVolume(1.0f);
+            Voice voice = new Voice("kevin16", Voice.GENDER_MALE, Voice.AGE_YOUNGER_ADULT, null);
+            synthesizer.getSynthesizerProperties().setVoice(voice);
+            AudioFormat audioFormat = new AudioFormat(16000, 16, 1, true, false);
+            DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
+            SourceDataLine sourceDataLine = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
+            sourceDataLine.open(audioFormat);
+            sourceDataLine.start();
+            synthesizer.speakPlainText("Hello, this is a sample text to speech conversion in Java", null);
+            synthesizer.waitEngineState(Synthesizer.QUEUE_EMPTY);
+            sourceDataLine.drain();
+            sourceDataLine.stop();
+            sourceDataLine.close();
+            synthesizer.deallocate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
