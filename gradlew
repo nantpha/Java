@@ -1,3 +1,58 @@
+
+
+
+const str = "Hello, World!"; // The string you want to convert to a byte array
+const audioFormat = "audio/wav"; // Desired audio format
+
+// Create an AudioContext
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+// Create an empty audio buffer
+const buffer = audioContext.createBuffer(1, str.length, audioContext.sampleRate);
+
+// Get the audio buffer data
+const channelData = buffer.getChannelData(0);
+const encoder = new TextEncoder();
+const encodedData = encoder.encode(str);
+
+// Convert the string to a byte array
+for (let i = 0; i < str.length; i++) {
+  channelData[i] = encodedData[i] / 128 - 1;
+}
+
+// Export the audio buffer as a data URL
+audioContext
+  .createMediaElementSource(buffer)
+  .connect(audioContext.destination);
+
+bufferToDataURL(buffer, audioFormat)
+  .then((dataURL) => {
+    console.log("Audio Data URL:", dataURL);
+  })
+  .catch((error) => {
+    console.error("Error:", error);
+  });
+
+// Function to convert buffer to Data URL
+function bufferToDataURL(buffer, format) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(bufferToBlob(buffer, format));
+  });
+}
+
+// Function to convert buffer to Blob
+function bufferToBlob(buffer, format) {
+  const blobOptions = { type: format };
+  const audioDataView = new DataView(
+    buffer.getChannelData(0).buffer
+  );
+  return new Blob([audioDataView], blobOptions);
+}
+
+
 #!/usr/bin/env sh
 
 ##############################################################################
