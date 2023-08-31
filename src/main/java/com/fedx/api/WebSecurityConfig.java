@@ -1,5 +1,5 @@
 
-
+curl -X POST http://service-endpoint/path -H "Content-Type: application/json" -d '{"key": "value"}'
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
