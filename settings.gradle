@@ -1,5 +1,45 @@
 
+import java.io.*;
+import java.util.concurrent.*;
 
+public class CopyJob {
+    private final ByteArrayOutputStream sourceStream;
+    private final ByteArrayOutputStream targetStream;
+    private final BlockingQueue<byte[]> queue;
+
+    public CopyJob() {
+        sourceStream = new ByteArrayOutputStream();
+        targetStream = new ByteArrayOutputStream();
+        queue = new LinkedBlockingQueue<>();
+    }
+
+    public void writeToSource(byte[] data) {
+        try {
+            sourceStream.write(data);
+            queue.put(data); // Put data into the queue
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void startCopying() {
+        Thread copyThread = new Thread(() -> {
+            try {
+                while (true) {
+                    byte[] data = queue.take(); // Wait for data if queue is empty
+                    synchronized (targetStream) {
+                        targetStream.write(data);
+                    }
+                }
+            } catch (InterruptedException | IOException e) {
+                e.printStackTrace();
+            }
+        });
+        copyThread.start();
+    }
+
+    // Other methods for file writing, etc.
+}
 import java.io.ByteArrayOutputStream;
 import java.util.concurrent.Semaphore;
 
