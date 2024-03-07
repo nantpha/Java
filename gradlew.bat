@@ -1,4 +1,12 @@
-@if "%DEBUG%" == "" @echo off
+@
+
+Sure, here's a suggested message:
+
+"Hey [Recipient's Name], just wanted to touch base regarding our recent deployments on Dec 1st and Dec 2nd. Are there any other production clusters that need deployment? If so, please let me know. Thanks!"
+
+
+
+if "%DEBUG%" == "" @echo off
 @rem ##########################################################################
 @rem
 @rem  Gradle startup script for Windows
