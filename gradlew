@@ -1,4 +1,49 @@
+// Service class for AWS S3 operations
+@Service
+public class S3Service {
 
+    @Autowired
+    private AmazonS3 amazonS3;
+
+    @Value("${aws.s3.bucket.name}")
+    private String bucketName;
+
+    public byte[] downloadFile(String key) {
+        try {
+            S3Object object = amazonS3.getObject(bucketName, key);
+            S3ObjectInputStream inputStream = object.getObjectContent();
+            byte[] bytes = IOUtils.toByteArray(inputStream);
+            inputStream.close();
+            return bytes;
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle exception
+            return null;
+        }
+    }
+}
+
+// Controller class to handle file downloads
+@RestController
+public class FileDownloadController {
+
+    @Autowired
+    private S3Service s3Service;
+
+    @GetMapping("/download/{key}")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable String key) {
+        try {
+            byte[] bytes = s3Service.downloadFile(key);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", key);
+            return ResponseEntity.ok().headers(headers).body(bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+}
 // 1. Configure AWS dependencies in your pom.xml or build.gradle file
 
 // 2. Configure AWS credentials in application.properties or as environment variables
