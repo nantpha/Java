@@ -1,5 +1,52 @@
 
+// 1. Configure AWS dependencies in your pom.xml or build.gradle file
 
+// 2. Configure AWS credentials in application.properties or as environment variables
+
+// 3. Service class for AWS S3 operations
+@Service
+public class S3Service {
+
+    @Autowired
+    private AmazonS3 amazonS3;
+
+    @Value("${aws.s3.bucket.name}")
+    private String bucketName;
+
+    public void uploadFile(MultipartFile file) {
+        try {
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(file.getSize());
+            amazonS3.putObject(bucketName, file.getOriginalFilename(), file.getInputStream(), metadata);
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle exception
+        }
+    }
+}
+
+// 4. Controller class to handle file uploads
+@RestController
+public class FileUploadController {
+
+    @Autowired
+    private S3Service s3Service;
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("Please upload a file");
+        }
+        
+        try {
+            s3Service.uploadFile(file);
+            return ResponseEntity.ok("File uploaded successfully!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload file");
+        }
+    }
+}
 
 const str = "Hello, World!"; // The string you want to convert to a byte array
 const audioFormat = "audio/wav"; // Desired audio format
