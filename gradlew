@@ -1,4 +1,4 @@
-
+I hope this email finds you well. I am reaching out to request some adjustments to our Dynatrace setup.
 
 If you want to initiate a discussion about the resignation with your manager, you can include a line inviting them to have a conversation about it. Here's how you can modify the response:
 
