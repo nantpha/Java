@@ -1,3 +1,22 @@
+
+
+If you want to initiate a discussion about the resignation with your manager, you can include a line inviting them to have a conversation about it. Here's how you can modify the response:
+
+Subject: Re: Resignation
+
+Dear [Manager's Name],
+
+Thank you for letting me know about your decision to resign. I want to express my sincere appreciation for your dedication and hard work during your time with us. Your leadership and contributions have been invaluable to our team.
+
+While we are sad to see you go, we understand and respect your decision. Let's have a discussion about your resignation to ensure a smooth transition. 
+
+We wish you all the best in your future endeavors and hope our paths cross again in the future.
+
+Please let me know a convenient time for you to discuss further.
+
+Best regards,
+[Your Name]
+
 // Service class for AWS S3 operations
 @Service
 public class S3Service {
