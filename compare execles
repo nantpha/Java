@@ -1,0 +1,83 @@
+@Service
+public class CsvComparisonService {
+
+    public List<String> compareCsvFiles(String folderAPath, String folderBPath) throws IOException {
+        List<String> unmatchedFiles = new ArrayList<>();
+
+        File folderA = new File(folderAPath);
+        File folderB = new File(folderBPath);
+
+        File[] filesA = folderA.listFiles((dir, name) -> name.endsWith(".csv"));
+        File[] filesB = folderB.listFiles((dir, name) -> name.endsWith(".csv"));
+
+        if (filesA == null || filesB == null) {
+            throw new IllegalArgumentException("Invalid folder paths or no CSV files found.");
+        }
+
+        // Step 1: Load all values from Folder B into a Set
+        Set<String> folderBValues = new HashSet<>();
+        for (File fileB : filesB) {
+            folderBValues.addAll(readCsvValues(fileB));
+        }
+
+        // Step 2: For each file in Folder A, check for match
+        for (File fileA : filesA) {
+            List<String> valuesA = readCsvValues(fileA);
+            boolean hasMatch = valuesA.stream().anyMatch(folderBValues::contains);
+
+            if (!hasMatch) {
+                System.out.println("❌ No matches found in file: " + fileA.getName());
+                unmatchedFiles.add(fileA.getName());
+            } else {
+                System.out.println("✅ Match found in file: " + fileA.getName());
+            }
+        }
+
+        return unmatchedFiles;
+    }
+
+    private List<String> readCsvValues(File file) throws IOException {
+        List<String> values = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] cells = line.split(",");
+                for (String cell : cells) {
+                    String cleaned = cell.trim();
+                    if (!cleaned.isEmpty()) {
+                        values.add(cleaned);
+                    }
+                }
+            }
+        }
+
+        return values;
+    }
+}
+
+@RestController
+@RequestMapping("/api/csv")
+public class CsvComparisonController {
+
+    private final CsvComparisonService csvComparisonService;
+
+    public CsvComparisonController(CsvComparisonService csvComparisonService) {
+        this.csvComparisonService = csvComparisonService;
+    }
+
+    @GetMapping("/compare")
+    public ResponseEntity<List<String>> compareCsvs() {
+        try {
+            String folderA = "C:/data/folderA";
+            String folderB = "C:/data/folderB";
+
+            List<String> unmatched = csvComparisonService.compareCsvFiles(folderA, folderB);
+            return ResponseEntity.ok(unmatched);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(List.of("Error: " + e.getMessage()));
+        }
+    }
+}
+
+
